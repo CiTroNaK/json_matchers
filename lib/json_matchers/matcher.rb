@@ -1,6 +1,7 @@
 require "json_schema"
 require "json_matchers/parser"
 require "json_matchers/validator"
+require "json-schema-generator"
 
 module JsonMatchers
   class Matcher
@@ -10,6 +11,8 @@ module JsonMatchers
     end
 
     def matches?(payload)
+      generate_schema_from_payload(payload) unless File.exist?(schema_path)
+
       self.errors = validator.validate(payload)
 
       errors.empty?
@@ -44,6 +47,13 @@ module JsonMatchers
       # follow one symlink and direct children
       # http://stackoverflow.com/questions/357754/can-i-traverse-symlinked-directories-in-ruby-with-a-glob
       Dir.glob("#{JsonMatchers.schema_root}/**{,/*/**}/*.json")
+    end
+
+    def generate_schema_from_payload(payload)
+      json_schema = JSON::SchemaGenerator.generate('schema', payload.to_s, { schema_version: 'draft4' })
+      file = File.new(schema_path, "w")
+      file.write(json_schema)
+      file.close
     end
   end
 end
