@@ -5,7 +5,7 @@ require "json_matchers/errors"
 
 module JsonMatchers
   class << self
-    attr_accessor :schema_root
+    attr_accessor :schema_root, :generate_schema
   end
 
   def self.path_to_schema(schema_name)

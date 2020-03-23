@@ -11,7 +11,9 @@ module JsonMatchers
     end
 
     def matches?(payload)
-      generate_schema_from_payload(payload) unless File.exist?(schema_path)
+      if JsonMatchers.generate_schema && !File.exist?(schema_path)
+        generate_schema_from_payload(payload)
+      end
 
       self.errors = validator.validate(payload)
 
