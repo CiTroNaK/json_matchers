@@ -15,6 +15,10 @@ module JsonMatchers
         generate_schema_from_payload(payload)
       end
 
+      if JsonMatchers.generate_example_response && !File.exist?(schema_path.sub(JsonMatchers.schema_root, JsonMatchers.examples_root))
+        generate_example_response_from_payload(payload)
+      end
+
       self.errors = validator.validate(payload)
 
       errors.empty?
@@ -55,6 +59,12 @@ module JsonMatchers
       json_schema = JSON::SchemaGenerator.generate('schema', payload.to_s, { schema_version: 'draft4' })
       file = File.new(schema_path, "w")
       file.write(json_schema)
+      file.close
+    end
+
+    def generate_example_response_from_payload(payload)
+      file = File.new(schema_path.sub(JsonMatchers.schema_root, JsonMatchers.examples_root), "w")
+      file.write(payload.to_s)
       file.close
     end
   end
